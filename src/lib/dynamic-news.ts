@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 // This is a mock of what would be a real API call to a news service
 // like NewsAPI, GNews, or an RSS aggregator.
-export const fetchLatestNews = createServerFn("GET", async () => {
+export const fetchLatestNews = createServerFn({ method: "GET" }).handler(async () => {
   // In a real app, you would fetch from:
   // const res = await fetch(`https://newsapi.org/v2/everything?q=Quebec&apiKey=${process.env.NEWS_API_KEY}`);
   // const data = await res.json();

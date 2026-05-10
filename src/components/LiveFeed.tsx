@@ -23,8 +23,8 @@ export function LiveFeed() {
       <div className="mt-6 divide-y-2 divide-ink/10">
         {isLoading ? (
           <div className="py-10 text-center font-serif font-bold opacity-50">Mise à jour...</div>
-        ) : (
-          news?.map((item) => (
+        ) : Array.isArray(news) ? (
+          news.map((item) => (
             <div key={item.id} className="py-4 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-widest text-accent">
@@ -48,6 +48,8 @@ export function LiveFeed() {
               </a>
             </div>
           ))
+        ) : (
+          <div className="py-10 text-center font-serif text-sm opacity-50">Aucune nouvelle disponible.</div>
         )}
       </div>
       
