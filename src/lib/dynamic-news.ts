@@ -1,37 +1,34 @@
 import { createServerFn } from "@tanstack/react-start";
+import Parser from "rss-parser";
 
-// This is a mock of what would be a real API call to a news service
-// like NewsAPI, GNews, or an RSS aggregator.
+const parser = new Parser();
+
+// This function fetches live news from Radio-Canada's public RSS feed
 export const fetchLatestNews = createServerFn({ method: "GET" }).handler(async () => {
-  // In a real app, you would fetch from:
-  // const res = await fetch(`https://newsapi.org/v2/everything?q=Quebec&apiKey=${process.env.NEWS_API_KEY}`);
-  // const data = await res.json();
-  
-  // For demonstration, we'll return mock dynamic data
-  return [
-    {
-      id: "news-1",
-      title: "Nouveau sommet sur le climat à Montréal",
+  try {
+    const feed = await parser.parseURL("https://ici.radio-canada.ca/rss/30");
+    
+    // We only want the latest 5 items and map them to our interface
+    return (feed.items || []).slice(0, 5).map((item, idx) => ({
+      id: item.guid || `rss-${idx}`,
+      title: item.title || "Nouvelle sans titre",
       source: "Radio-Canada",
-      date: new Date().toISOString(),
-      summary: "Les maires de 20 grandes villes se réunissent pour discuter de l'adaptation aux inondations.",
-      url: "#"
-    },
-    {
-      id: "news-2",
-      title: "Économie : Le taux de chômage stagne au Québec",
-      source: "La Presse",
-      date: new Date().toISOString(),
-      summary: "Les données de Statistiques Canada montrent une résilience surprenante du marché de l'emploi.",
-      url: "#"
-    },
-    {
-      id: "news-3",
-      title: "Culture : Ouverture du nouveau musée d'art contemporain",
-      source: "Le Devoir",
-      date: new Date().toISOString(),
-      summary: "Après 4 ans de travaux, l'institution rouvre ses portes au public demain.",
-      url: "#"
-    }
-  ];
+      date: item.isoDate || new Date().toISOString(),
+      summary: item.contentSnippet || item.content || "",
+      url: item.link || "#"
+    }));
+  } catch (error) {
+    console.error("Erreur lors de la récupération du flux RSS:", error);
+    // Fallback to minimal mock if feed is down
+    return [
+      {
+        id: "news-fallback",
+        title: "Le flux de nouvelles est temporairement indisponible",
+        source: "Système",
+        date: new Date().toISOString(),
+        summary: "Nous n'avons pas pu récupérer les dernières nouvelles en direct. Veuillez réessayer plus tard.",
+        url: "#"
+      }
+    ];
+  }
 });
